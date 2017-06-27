@@ -25,6 +25,7 @@
 <%@ include file="nav.jsp"%>
 <div class="container">
     <h1>首页</h1>
+    <small class="text-danger">${requestScope.message}</small>
 </div>
 </body>
 </html>

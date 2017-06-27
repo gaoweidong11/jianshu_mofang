@@ -69,18 +69,19 @@
     <div id="logo"><img src="static/image/logo.png" alt="简书"></div>
     <div id="form-box" class="col-md-4 col-md-offset-4">
         <h3 class="text-center"><a class="text-muted" href="">登录</a> · <a id="sign-up" href="">注册</a></h3>
-        <form class="form-horizontal" action="">
+        <form class="form-horizontal" action="user" method="post">
+            <input type="hidden" name="action" value="signUp">
             <div class="input-group">
                 <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-                <input class="form-control input-lg" type="text" placeholder="你的昵称">
+                <input name="nick" class="form-control input-lg" type="text" placeholder="你的昵称">
             </div>
             <div class="input-group">
                 <span class="input-group-addon"><i class="glyphicon glyphicon-phone"></i></span>
-                <input class="form-control input-lg" type="text" placeholder="手机号">
+                <input name="mobile" class="form-control input-lg" type="text" placeholder="手机号">
             </div>
             <div class="input-group">
                 <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
-                <input class="form-control input-lg" type="text" placeholder="设置密码">
+                <input name="password" class="form-control input-lg" type="password" placeholder="设置密码">
             </div>
             <button class="btn btn-success btn-lg btn-block">注册</button>
             <p class="text-center">
