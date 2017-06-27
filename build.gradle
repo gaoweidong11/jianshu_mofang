@@ -1,0 +1,18 @@
+group 'jianshu.xin.datalab'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'war'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'javax:javaee-api:7.0'
+    compile 'mysql:mysql-connector-java:5.1.42'
+    compile 'jstl:jstl:1.2'
+    compile 'com.alibaba:fastjson:1.2.7'
+}
