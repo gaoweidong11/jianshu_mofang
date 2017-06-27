@@ -1,0 +1,23 @@
+body {
+    padding-top: 70px;
+}
+
+.navbar {
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+}
+
+ul .btn {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.dropdown-menu {
+    width: 200px !important;
+    /*height: 400px !important;*/
+}
+
+li.set {
+    padding-left: 8px;
+}
