@@ -2,6 +2,7 @@ package jianshu.datalab.xin.servlet;
 
 import jianshu.datalab.xin.util.Db;
 import jianshu.datalab.xin.util.Error;
+import org.jasypt.util.password.StrongPasswordEncryptor;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -39,7 +40,8 @@ public class UserAction extends HttpServlet {
         // TODO: 6/27/17 isNickExisted
         // TODO: 6/27/17 isMobileExisted
 
-        String password = req.getParameter("password");
+        StrongPasswordEncryptor encryptor = new StrongPasswordEncryptor();
+        String password = encryptor.encryptPassword(req.getParameter("password"));
 
         Connection connection = Db.getConnection();
         PreparedStatement preparedStatement = null;

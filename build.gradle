@@ -15,4 +15,5 @@ dependencies {
     compile 'mysql:mysql-connector-java:5.1.42'
     compile 'jstl:jstl:1.2'
     compile 'com.alibaba:fastjson:1.2.7'
+    compile 'org.jasypt:jasypt:1.9.2'
 }
