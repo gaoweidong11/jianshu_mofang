@@ -64,7 +64,6 @@
     <script src='static/js/nav.js'></script>
     <script>
         function validate(element, text, removedClass, addedClass) {
-            console.log(removedClass[0]);
             element.parent()
                 .removeClass(removedClass[0])
                 .addClass(addedClass[0]);
@@ -78,23 +77,35 @@
         $(function () {
             $('#index').removeClass('active');
 
-            $('#nick').on({
-                focus: function () {
-                    validate(
-                        $(this),
-                        '昵称 已经被使用',
-                        ['has-success', 'text-success'],
-                        ['has-error', 'text-danger']
-                    );
-                },
-                blur: function () {
-                    validate(
-                        $(this),
-                        '昵称 已经被使用',
-                        ['has-error', 'text-danger'],
-                        ['has-success', 'text-success']
-                    );
-                }
+            $('#nick').blur(function () {
+                $.ajax({
+                    url: 'user',
+                    type: 'post',
+                    data: {'action': 'isNickExisted', 'nick': $('#nick').val()},
+                    dataType: 'json',
+                    success: function (result) {
+                        // todo
+                        var isNickExisted = result.isNickExisted; // false
+
+                        console.log("isNickExisted: " + isNickExisted);
+
+                        if (isNickExisted) {
+                            validate(
+                                $('#nick'),
+                                '昵称 已经被使用',
+                                ['has-success', 'text-success'],
+                                ['has-error', 'text-danger']
+                            );
+                        } else {
+                            validate(
+                                $('#nick'),
+                                '昵称 可以使用',
+                                ['has-error', 'text-danger'],
+                                ['has-success', 'text-success']
+                            );
+                        }
+                    }
+                });
             });
         });
     </script>
@@ -130,6 +141,7 @@
                 <small><a href=''>用户协议</a> 和 <a href=''>隐私政策</a> 。</small>
             </p>
         </form>
+        <small class="text-danger">${requestScope.message}</small>
     </div>
 </div>
 </body>
