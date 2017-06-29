@@ -6,7 +6,7 @@ $(function () {
     $("[name='night-mode']").bootstrapSwitch();
     $("[name='font-mode']").bootstrapSwitch();
     $('#sign-up').click(function () {
-        window.location.href = "sign_up.jsp";
+        window.location.href = "../../sign_up.jsp";
     });
     $('#write-note').click(function () {
         window.location.href = 'write_note.jsp';
