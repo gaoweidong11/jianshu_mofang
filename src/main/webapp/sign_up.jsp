@@ -139,16 +139,16 @@
                 validate(true, 'mobile');
             });
 
-//            $('#sign-up-form').submit(function () {
-//                validate(false, 'nick');
-//                validate(false, 'mobile');
-//                if (!isNickValidated) {
-//                    $('#nick').focus();
-//                } else {
-//                    $('#mobile').focus();
-//                }
-//                return isNickValidated && isMobileValidated;
-//            });
+            $('#sign-up-form').submit(function () {
+                validate(false, 'nick');
+                validate(false, 'mobile');
+                if (!isNickValidated) {
+                    $('#nick').focus();
+                } else {
+                    $('#mobile').focus();
+                }
+                return isNickValidated && isMobileValidated;
+            });
         });
     </script>
 </head>
