@@ -35,8 +35,8 @@ public class UserAction extends HttpServlet {
             return;
         }
 
-        if ("isExisted".equals(action)) {
-            isExisted(req, resp);
+        if ("isNickOrMobileExisted".equals(action)) {
+            isNickOrMobileExisted(req, resp);
             return;
         }
 
@@ -47,9 +47,26 @@ public class UserAction extends HttpServlet {
         String nick = req.getParameter("nick").trim();
         String mobile = req.getParameter("mobile").trim();
 
-        String field = isExisted(req, resp);
-        if (field != null) {
-            req.setAttribute("message", (field.equals("nick")) ? "昵称" : "手机号" + " 已经被使用");
+        if (nick.length() == 0) {
+            req.setAttribute("message", "请输入昵称");
+            req.getRequestDispatcher("sign_up.jsp").forward(req, resp);
+            return;
+        }
+
+        if (mobile.length() == 0) {
+            req.setAttribute("message", "请输入手机号");
+            req.getRequestDispatcher("sign_up.jsp").forward(req, resp);
+            return;
+        }
+
+        if (isNickExisted(req, resp)) {
+            req.setAttribute("message", "昵称 已经被使用");
+            req.getRequestDispatcher("sign_up.jsp").forward(req, resp);
+            return;
+        }
+
+        if (isMobileExisted(req, resp)) {
+            req.setAttribute("message", "手机号 已经被使用");
             req.getRequestDispatcher("sign_up.jsp").forward(req, resp);
             return;
         }
@@ -84,9 +101,37 @@ public class UserAction extends HttpServlet {
         }
     }
 
-    private String isExisted(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    /**
+     * for signUp
+     */
+    private boolean isNickExisted(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        return isExisted(req, resp, "nick", req.getParameter("nick").trim());
+    }
+
+    /**
+     * for signUp
+     */
+    private boolean isMobileExisted(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        return isExisted(req, resp, "mobile", req.getParameter("mobile").trim());
+    }
+
+    /**
+     * for AJAX
+     */
+    private void isNickOrMobileExisted(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String field = req.getParameter("field");
         String value = req.getParameter("value").trim();
+
+        boolean isExisted = isExisted(req, resp, field, value);
+
+        resp.setContentType("application/json");
+        Writer writer = resp.getWriter();
+        Map<String, Object> map = new HashMap<>();
+        map.put("isExisted", isExisted);
+        writer.write(JSON.toJSONString(map));
+    }
+
+    private boolean isExisted(HttpServletRequest req, HttpServletResponse resp, String field, String value) throws ServletException, IOException {
         boolean isNickExisted = false;
         boolean isMobileExisted = false;
 
@@ -99,7 +144,7 @@ public class UserAction extends HttpServlet {
                 preparedStatement = connection.prepareStatement(sql);
             } else {
                 Error.showError(req, resp);
-                return  null; // // TODO: 6/29/17  
+                return false; // TODO: 6/29/17
             }
             preparedStatement.setString(1, value);
             resultSet = preparedStatement.executeQuery();
@@ -115,16 +160,7 @@ public class UserAction extends HttpServlet {
             Db.close(resultSet, preparedStatement, connection);
         }
 
-        resp.setContentType("application/json");
-        Writer writer = resp.getWriter();
-        Map<String, Object> map = new HashMap<>();
-        map.put("isExisted", (field.equals("nick")) ? isNickExisted : isMobileExisted);
-        writer.write(JSON.toJSONString(map));
-
-        if (isNickExisted || isMobileExisted) {
-            return field; // nick mobile
-        }
-        return null;
+        return isNickExisted || isMobileExisted;
     }
 
     @Override

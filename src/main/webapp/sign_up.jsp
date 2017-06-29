@@ -94,7 +94,7 @@
             $.ajax({
                 url: 'user',
                 type: 'post',
-                data: {'action': 'isExisted', 'field': field, 'value': element.val()},
+                data: {'action': 'isNickOrMobileExisted', 'field': field, 'value': element.val()},
                 dataType: 'json',
                 async: async,
                 success: function (result) {
