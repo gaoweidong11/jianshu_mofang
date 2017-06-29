@@ -78,15 +78,23 @@
             $('#index').removeClass('active');
 
             $('#nick').blur(function () {
+                var nick = $(this);
+                if (nick.val().trim().length === 0) {
+                    validate(
+                        $('#nick'),
+                        '请输入昵称',
+                        ['has-success', 'text-success'],
+                        ['has-error', 'text-danger']
+                    );
+                    return;
+                }
                 $.ajax({
                     url: 'user',
                     type: 'post',
-                    data: {'action': 'isNickExisted', 'nick': $('#nick').val()},
+                    data: {'action': 'isNickExisted', 'nick': nick.val()},
                     dataType: 'json',
                     success: function (result) {
-                        // todo
                         var isNickExisted = result.isNickExisted; // false
-
                         console.log("isNickExisted: " + isNickExisted);
 
                         if (isNickExisted) {

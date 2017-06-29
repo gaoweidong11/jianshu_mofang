@@ -1,7 +1,6 @@
 package jianshu.datalab.xin.servlet;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import jianshu.datalab.xin.util.Db;
 import jianshu.datalab.xin.util.Error;
 import org.jasypt.util.password.StrongPasswordEncryptor;
@@ -15,6 +14,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +49,7 @@ public class UserAction extends HttpServlet {
 
         // TODO: 6/27/17 isNickExisted
         if (isNickExisted(req, resp)) {
-            req.setAttribute("message", "...");
+            req.setAttribute("message", "昵称 已经被使用");
             req.getRequestDispatcher("sign_up.jsp").forward(req, resp);
             return;
         }
@@ -87,22 +87,37 @@ public class UserAction extends HttpServlet {
     }
 
     private boolean isNickExisted(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String nick = req.getParameter("nick");
+        String nick = req.getParameter("nick").trim();
+        boolean isNickExisted = false;
 
-        // TODO: 6/28/17 SELECT * FROM db_jianshu.user WHERE nick = ?;
+        Connection connection = Db.getConnection();
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        String sql = "SELECT * FROM db_jianshu.user WHERE nick = ?";
+        try {
+            if (connection != null) {
+                preparedStatement = connection.prepareStatement(sql);
+            } else {
+                Error.showError(req, resp);
+                return false;
+            }
+            preparedStatement.setString(1, nick);
+            resultSet = preparedStatement.executeQuery();
+            isNickExisted = resultSet.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            Db.close(resultSet, preparedStatement, connection);
+        }
 
         resp.setContentType("application/json");
         Writer writer = resp.getWriter();
-
         Map<String, Object> map = new HashMap<>();
-        map.put("isNickExisted", (Math.random() > .5) ? true : false);
-
-        String json = JSON.toJSONString(map, true);
-
-        System.out.println(json);
-
+        map.put("isNickExisted", isNickExisted);
+        String json = JSON.toJSONString(map);
         writer.write(json);
-        return true;
+
+        return isNickExisted;
     }
 
     @Override
