@@ -63,7 +63,11 @@
     <script src='static/js/bootstrap-switch.min.js'></script>
     <script src='static/js/nav.js'></script>
     <script>
-        function validate(element, text, removedClass, addedClass) {
+
+        var isNickValidated; // 昵称通过了验证
+        var isMobileValidated; // 手机号通过了验证
+
+        function showMessage(element, text, removedClass, addedClass) {
             element.parent()
                 .removeClass(removedClass[0])
                 .addClass(addedClass[0]);
@@ -74,46 +78,65 @@
                 .fadeIn('slow');
         }
 
+        function validate(aysnc) {
+            var nick = $('#nick');
+            if (nick.val().trim().length === 0) {
+                showMessage(
+                    nick,
+                    '请输入昵称',
+                    ['has-success', 'text-success'],
+                    ['has-error', 'text-danger']
+                );
+                nick.focus();
+                isNickValidated = false;
+                return;
+            }
+            $.ajax({
+                url: 'user',
+                type: 'post',
+                data: {'action': 'isNickExisted', 'nick': nick.val()},
+                dataType: 'json',
+                async: aysnc,
+                success: function (result) {
+                    var isNickExisted = result.isNickExisted; // false
+                    console.log("isNickExisted: " + isNickExisted);
+
+                    if (isNickExisted) {
+                        showMessage(
+                            nick,
+                            '昵称 已经被使用',
+                            ['has-success', 'text-success'],
+                            ['has-error', 'text-danger']
+                        );
+                         isNickExisted = false;
+                    } else {
+                        showMessage(
+                            nick,
+                            '昵称 可以使用',
+                            ['has-error', 'text-danger'],
+                            ['has-success', 'text-success']
+                        );
+                        isNickValidated = true;
+                    }
+                }
+            });
+        }
+
         $(function () {
             $('#index').removeClass('active');
 
             $('#nick').blur(function () {
-                var nick = $(this);
-                if (nick.val().trim().length === 0) {
-                    validate(
-                        $('#nick'),
-                        '请输入昵称',
-                        ['has-success', 'text-success'],
-                        ['has-error', 'text-danger']
-                    );
-                    return;
-                }
-                $.ajax({
-                    url: 'user',
-                    type: 'post',
-                    data: {'action': 'isNickExisted', 'nick': nick.val()},
-                    dataType: 'json',
-                    success: function (result) {
-                        var isNickExisted = result.isNickExisted; // false
-                        console.log("isNickExisted: " + isNickExisted);
+                validate(true);
+            });
 
-                        if (isNickExisted) {
-                            validate(
-                                $('#nick'),
-                                '昵称 已经被使用',
-                                ['has-success', 'text-success'],
-                                ['has-error', 'text-danger']
-                            );
-                        } else {
-                            validate(
-                                $('#nick'),
-                                '昵称 可以使用',
-                                ['has-error', 'text-danger'],
-                                ['has-success', 'text-success']
-                            );
-                        }
-                    }
-                });
+            $('#sign-up-form').submit(function () {
+                validate(false);
+                return isNickValidated && isMobileValidated;
+                if (!isNickValidated) {
+                    $('#nick').focus();
+                } else {
+                    $('#mobile').focus();
+                }
             });
         });
     </script>
@@ -124,7 +147,7 @@
     <div id='logo'><img src='static/image/logo.png' alt='简书'></div>
     <div id='form-box' class='col-md-4 col-md-offset-4'>
         <h3 class='text-center'><a class='text-muted' href=''>登录</a> · <a id='sign-up' href=''>注册</a></h3>
-        <form class='form-horizontal' action='user' method='post'>
+        <form id="sign-up-form" class='form-horizontal' action='user' method='post'>
             <input type='hidden' name='action' value='signUp'>
             <div class='input-group'>
                 <span class='input-group-addon'><i class='glyphicon glyphicon-user'></i></span>
