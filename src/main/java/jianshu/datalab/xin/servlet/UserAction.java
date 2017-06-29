@@ -47,8 +47,9 @@ public class UserAction extends HttpServlet {
         String nick = req.getParameter("nick").trim();
         String mobile = req.getParameter("mobile").trim();
 
-        if (isExisted(req, resp)) {
-            req.setAttribute("message", "昵称 已经被使用");
+        String field = isExisted(req, resp);
+        if (field != null) {
+            req.setAttribute("message", (field.equals("nick")) ? "昵称" : "手机号" + " 已经被使用");
             req.getRequestDispatcher("sign_up.jsp").forward(req, resp);
             return;
         }
@@ -98,7 +99,7 @@ public class UserAction extends HttpServlet {
                 preparedStatement = connection.prepareStatement(sql);
             } else {
                 Error.showError(req, resp);
-                return false;
+                return  null; // // TODO: 6/29/17  
             }
             preparedStatement.setString(1, value);
             resultSet = preparedStatement.executeQuery();
@@ -120,9 +121,8 @@ public class UserAction extends HttpServlet {
         map.put("isExisted", (field.equals("nick")) ? isNickExisted : isMobileExisted);
         writer.write(JSON.toJSONString(map));
 
-        if (field.equals("nick") && !isNickExisted) {
-            return field;
-        } else if (field.equals("mobile") !isMobileExisted) {
+        if (isNickExisted || isMobileExisted) {
+            return field; // nick mobile
         }
         return null;
     }
