@@ -78,45 +78,52 @@
                 .fadeIn('slow');
         }
 
-        function validate(aysnc) {
-            var nick = $('#nick');
-            if (nick.val().trim().length === 0) {
+        function validate(async, field) {
+            var element = $('#' + field);
+            var name = (field === 'nick') ? '昵称' : '手机号';
+            if (element.val().trim().length === 0) {
                 showMessage(
-                    nick,
-                    '请输入昵称',
+                    element,
+                    '请输入' + name,
                     ['has-success', 'text-success'],
                     ['has-error', 'text-danger']
                 );
-                nick.focus();
                 isNickValidated = false;
                 return;
             }
             $.ajax({
                 url: 'user',
                 type: 'post',
-                data: {'action': 'isNickExisted', 'nick': nick.val()},
+                data: {'action': 'isExisted', 'field': field, 'value': element.val()},
                 dataType: 'json',
-                async: aysnc,
+                async: async,
                 success: function (result) {
-                    var isNickExisted = result.isNickExisted; // false
-                    console.log("isNickExisted: " + isNickExisted);
-
-                    if (isNickExisted) {
+                    var isExisted = result.isExisted;
+                    console.log("isExisted: " + isExisted);
+                    if (isExisted) {
                         showMessage(
-                            nick,
-                            '昵称 已经被使用',
+                            element,
+                            name + ' 已经被使用',
                             ['has-success', 'text-success'],
                             ['has-error', 'text-danger']
                         );
-                         isNickExisted = false;
+                        if (field === 'nick') {
+                            isNickValidated = false;
+                        } else {
+                            isMobileValidated = false;
+                        }
                     } else {
                         showMessage(
-                            nick,
-                            '昵称 可以使用',
+                            element,
+                            name + ' 可以使用',
                             ['has-error', 'text-danger'],
                             ['has-success', 'text-success']
                         );
-                        isNickValidated = true;
+                        if (field === 'nick') {
+                            isNickValidated = true;
+                        } else {
+                            isMobileValidated = true;
+                        }
                     }
                 }
             });
@@ -126,17 +133,21 @@
             $('#index').removeClass('active');
 
             $('#nick').blur(function () {
-                validate(true);
+                validate(true, 'nick');
+            });
+            $('#mobile').blur(function () {
+                validate(true, 'mobile');
             });
 
             $('#sign-up-form').submit(function () {
-                validate(false);
-                return isNickValidated && isMobileValidated;
+                validate(false, 'nick');
+                validate(false, 'mobile');
                 if (!isNickValidated) {
                     $('#nick').focus();
                 } else {
                     $('#mobile').focus();
                 }
+                return isNickValidated && isMobileValidated;
             });
         });
     </script>
@@ -156,7 +167,7 @@
             <small id='nick-message'></small>
             <div class='input-group'>
                 <span class='input-group-addon'><i class='glyphicon glyphicon-phone'></i></span>
-                <input name='mobile' class='form-control input-lg' type='text' placeholder='手机号'>
+                <input id="mobile" name='mobile' class='form-control input-lg' type='text' placeholder='手机号'>
             </div>
             <small id='mobile-message'></small>
             <div class='input-group'>

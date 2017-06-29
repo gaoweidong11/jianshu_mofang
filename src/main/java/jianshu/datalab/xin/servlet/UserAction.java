@@ -35,8 +35,8 @@ public class UserAction extends HttpServlet {
             return;
         }
 
-        if ("isNickExisted".equals(action)) {
-            isNickExisted(req, resp);
+        if ("isExisted".equals(action)) {
+            isExisted(req, resp);
             return;
         }
 
@@ -47,14 +47,11 @@ public class UserAction extends HttpServlet {
         String nick = req.getParameter("nick").trim();
         String mobile = req.getParameter("mobile").trim();
 
-        // TODO: 6/27/17 isNickExisted
-        if (isNickExisted(req, resp)) {
+        if (isExisted(req, resp)) {
             req.setAttribute("message", "昵称 已经被使用");
             req.getRequestDispatcher("sign_up.jsp").forward(req, resp);
             return;
         }
-
-        // TODO: 6/27/17 isMobileExisted
 
         StrongPasswordEncryptor encryptor = new StrongPasswordEncryptor();
         String password = encryptor.encryptPassword(req.getParameter("password"));
@@ -86,14 +83,16 @@ public class UserAction extends HttpServlet {
         }
     }
 
-    private boolean isNickExisted(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String nick = req.getParameter("nick").trim();
+    private String isExisted(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String field = req.getParameter("field");
+        String value = req.getParameter("value").trim();
         boolean isNickExisted = false;
+        boolean isMobileExisted = false;
 
         Connection connection = Db.getConnection();
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        String sql = "SELECT * FROM db_jianshu.user WHERE nick = ?";
+        String sql = "SELECT * FROM db_jianshu.user WHERE " + field + " = ?";
         try {
             if (connection != null) {
                 preparedStatement = connection.prepareStatement(sql);
@@ -101,9 +100,14 @@ public class UserAction extends HttpServlet {
                 Error.showError(req, resp);
                 return false;
             }
-            preparedStatement.setString(1, nick);
+            preparedStatement.setString(1, value);
             resultSet = preparedStatement.executeQuery();
-            isNickExisted = resultSet.next();
+
+            if (field.equals("nick")) {
+                isNickExisted = resultSet.next();
+            } else {
+                isMobileExisted = resultSet.next();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -113,11 +117,14 @@ public class UserAction extends HttpServlet {
         resp.setContentType("application/json");
         Writer writer = resp.getWriter();
         Map<String, Object> map = new HashMap<>();
-        map.put("isNickExisted", isNickExisted);
-        String json = JSON.toJSONString(map);
-        writer.write(json);
+        map.put("isExisted", (field.equals("nick")) ? isNickExisted : isMobileExisted);
+        writer.write(JSON.toJSONString(map));
 
-        return isNickExisted;
+        if (field.equals("nick") && !isNickExisted) {
+            return field;
+        } else if (field.equals("mobile") !isMobileExisted) {
+        }
+        return null;
     }
 
     @Override
